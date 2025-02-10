@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+*.log
+.DS_Store
+
+# Virtual Environment
+venv/
+env/
+*.venv
+
+# Django
+*.sqlite3
+db.sqlite3
+/media/
+staticfiles/
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# IDEs y editores
+.vscode/
+.idea/
+*.iml
+
+# Configuración del sistema operativo
+Thumbs.db
+Desktop.ini
+
+# Archivos de entorno
+.env
+*.env
+
+# Archivos de dependencias
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Cachés y logs
+*.log
+*.swp
+.nox/
