@@ -1,56 +1,56 @@
 from typing import List, Optional
-from gestion_stock.models import Cliente, Localidad
+from gestion_stock.models import Proveedor, Localidad
 
-class ClienteRepository:
-    
-    def get_all(self) -> List[Cliente]:
-        return Cliente.objects.all()
+class ProveedorRepository:
 
-    def get_by_id(self, id: int) -> Optional[Cliente]:
+    def get_all(self) -> List[Proveedor]:
+        return Proveedor.objects.all()
+
+    def get_by_id(self, id: int) -> Optional[Proveedor]:
         try:
-            cliente = Cliente.objects.get(id=id)
-        except Cliente.DoesNotExist:
-            cliente = None
-        return cliente
+            proveedor = Proveedor.objects.get(id=id)
+        except Proveedor.DoesNotExist:
+            proveedor = None
+        return proveedor
 
-    def filter_by_nombre(self, nombre: str) -> List[Cliente]:
-        return Cliente.objects.filter(nombre__icontains=nombre)
+    def filter_by_nombre(self, nombre: str) -> List[Proveedor]:
+        return Proveedor.objects.filter(nombre__icontains=nombre)
 
-    def filter_by_localidad(self, localidad: Localidad) -> List[Cliente]:
-        return Cliente.objects.filter(localidad=localidad)
+    def filter_by_localidad(self, localidad: Localidad) -> List[Proveedor]:
+        return Proveedor.objects.filter(localidad=localidad)
 
     def create(
-        self,
-        nombre: str,
-        direccion: Optional[str] = None,
-        telefono: Optional[str] = None,
-        email: Optional[str] = None,
-        localidad: Optional[Localidad] = None,
-    ) -> Cliente:
-        return Cliente.objects.create(
+        self, 
+        nombre: str, 
+        direccion: Optional[str] = None, 
+        telefono: Optional[str] = None, 
+        email: Optional[str] = None, 
+        localidad: Optional[Localidad] = None
+    ) -> Proveedor:
+        return Proveedor.objects.create(
             nombre=nombre,
             direccion=direccion,
             telefono=telefono,
             email=email,
-            localidad=localidad,
+            localidad=localidad
         )
 
     def update(
-        self,
-        cliente: Cliente,
-        nombre: str,
-        direccion: Optional[str] = None,
-        telefono: Optional[str] = None,
-        email: Optional[str] = None,
-        localidad: Optional[Localidad] = None,
-    ) -> Cliente:
-        cliente.nombre = nombre
-        cliente.direccion = direccion
-        cliente.telefono = telefono
-        cliente.email = email
-        cliente.localidad = localidad
-        cliente.save()
-        return cliente
+        self, 
+        proveedor: Proveedor, 
+        nombre: str, 
+        direccion: Optional[str] = None, 
+        telefono: Optional[str] = None, 
+        email: Optional[str] = None, 
+        localidad: Optional[Localidad] = None
+    ) -> Proveedor:
+        proveedor.nombre = nombre
+        proveedor.direccion = direccion
+        proveedor.telefono = telefono
+        proveedor.email = email
+        proveedor.localidad = localidad
+        proveedor.save()
+        return proveedor
 
-    def delete(self, cliente: Cliente):
-        return cliente.delete()
+    def delete(self, proveedor: Proveedor):
+        return proveedor.delete()

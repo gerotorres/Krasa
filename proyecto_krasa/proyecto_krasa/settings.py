@@ -51,11 +51,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'proyecto_krasa.urls'
-
+import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'home', 'templates')],  # 💡 Agrega esto
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

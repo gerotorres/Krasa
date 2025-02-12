@@ -1,8 +1,7 @@
 from django.contrib import admin
 from .models import (
     Categoria, Subcategoria, Producto, Cliente, Proveedor, Venta, Compra,
-    DetalleVenta, DetalleCompra, Pais, Provincia, Localidad,
-    TipoUsuario, Usuario, Empleado
+    DetalleVenta, DetalleCompra, Pais, Provincia, Localidad, Empleado
 )
 
 # Registramos todos los modelos en el admin de Django
@@ -18,6 +17,4 @@ admin.site.register(DetalleCompra)
 admin.site.register(Pais)
 admin.site.register(Provincia)
 admin.site.register(Localidad)
-admin.site.register(TipoUsuario)
-admin.site.register(Usuario)
 admin.site.register(Empleado)

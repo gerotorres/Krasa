@@ -1,0 +1,12 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="bg-image vh-100 d-flex justify-content-center align-items-center">
+    <div class="fondo text-white text-center">
+        <h1 class="display-4">Bienvenido{% if user.is_authenticated %} {{ user }}{% endif %}</h1>
+        <h2 class="lead">A concesionaria Salvador Dalí</h2>
+        <h4>Explora nuestros vehículos</h4>
+    </div>
+</div>
+{% endblock %}

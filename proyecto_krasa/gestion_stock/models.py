@@ -1,5 +1,7 @@
 from django.db import models
 
+from django.contrib.auth.models import User
+
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100, null=False)
 
@@ -71,16 +73,26 @@ class Proveedor(models.Model):
     def __str__(self):
         return self.nombre
 
+class FormaPago(models.Model):
+    tipo_pago = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        db_table = "forma_pago"
+
+    def __str__(self):
+        return self.tipo_pago
+
 class Venta(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-    
+    forma_pago = models.ForeignKey(FormaPago, on_delete=models.SET_NULL, null=True) 
+
     class Meta:
         db_table = "venta"
-    
+
     def __str__(self):
-        return f"Venta {self.id} - Cliente: {self.cliente.nombre if self.cliente else 'Sin cliente'}"
+        return f"Venta {self.id} - Cliente: {self.cliente.nombre if self.cliente else 'Sin cliente'} - Pago: {self.forma_pago.descripcion if self.forma_pago else 'No especificado'}"
 
 class Compra(models.Model):
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True)
@@ -146,25 +158,6 @@ class Localidad(models.Model):
     def __str__(self):
         return self.nombre
 
-class TipoUsuario(models.Model):
-    nombre = models.CharField(max_length=50, null=False)
-    
-    class Meta:
-        db_table = "tipo_usuario"
-    
-    def __str__(self):
-        return self.nombre
-
-class Usuario(models.Model):
-    nombre = models.CharField(max_length=100, null=False)
-    clave = models.CharField(max_length=128, null=False)
-    tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.CASCADE)
-    
-    class Meta:
-        db_table = "usuario"
-    
-    def __str__(self):
-        return self.nombre
 
 class Empleado(models.Model):
     nombre = models.CharField(max_length=100, null=False)
@@ -172,7 +165,7 @@ class Empleado(models.Model):
     direccion = models.CharField(max_length=255, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
-    usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     
     class Meta:
         db_table = "empleado"
