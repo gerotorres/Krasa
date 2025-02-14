@@ -1,0 +1,94 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <h2 class="text-dark font-weight-bold mb-4">{% trans "Crear Producto" %}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_nombre" class="form-label">{% trans "Nombre" %}</label>
+                    <input type="text" name="nombre" id="id_nombre" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_categoria" class="form-label">{% trans "Categoría" %}</label>
+                    <select name="categoria" id="id_categoria" class="form-control">
+                        <option value="">{% trans "Selecciona una categoría" %}</option>
+                        {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_subcategoria" class="form-label">{% trans "Subcategoría" %}</label>
+                    <select name="subcategoria" id="id_subcategoria" class="form-control">
+                        <option value="">{% trans "Selecciona una subcategoría" %}</option>
+                        {% for subcategoria in subcategorias %}
+                            <option value="{{ subcategoria.id }}" data-categoria="{{ subcategoria.categoria.id }}">{{ subcategoria.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_marca" class="form-label">{% trans "Marca" %}</label>
+                    <select name="marca" id="id_marca" class="form-control">
+                        <option value="">{% trans "Selecciona una marca" %}</option>
+                        {% for marca in marcas %}
+                            <option value="{{ marca.id }}">{{ marca.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_precio" class="form-label">{% trans "Precio (USD)" %}</label>
+                    <input type="number" step="0.01" name="precio" id="id_precio" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_stock" class="form-label">{% trans "Stock" %}</label>
+                    <input type="number" step="1" name="stock" id="id_stock" class="form-control" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_codigo_barras" class="form-label">{% trans "Código de Barras" %}</label>
+                    <input type="text" name="codigo_barras" id="id_codigo_barras" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_ubicacion_deposito" class="form-label">{% trans "Ubicación en Depósito" %}</label>
+                    <input type="text" name="ubicacion_deposito" id="id_ubicacion_deposito" class="form-control">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="id_descripcion" class="form-label">{% trans "Descripción" %}</label>
+                <textarea name="descripcion" id="id_descripcion" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success w-100">{% trans "Guardar" %}</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const categoriaSelect = document.getElementById("id_categoria");
+        const subcategoriaSelect = document.getElementById("id_subcategoria");
+        const subcategorias = Array.from(subcategoriaSelect.options);
+        
+        categoriaSelect.addEventListener("change", function() {
+            const categoriaSeleccionada = this.value;
+            subcategoriaSelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
+            
+            subcategorias.forEach(option => {
+                if (option.dataset.categoria === categoriaSeleccionada || option.value === "") {
+                    subcategoriaSelect.appendChild(option.cloneNode(true));
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

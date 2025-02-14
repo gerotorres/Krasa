@@ -1,5 +1,8 @@
 from typing import List, Optional
-from gestion_stock.models import Producto, Categoria, Subcategoria, Marca
+from gestion_stock.models import Producto, Categoria, Subcategoria, Marca, DetalleVenta
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Sum, Q
 
 class ProductoRepository:
 
@@ -17,6 +20,32 @@ class ProductoRepository:
 
     def get_productos_in_price_range(self, min_price: float, max_price: float) -> List[Producto]:
         return Producto.objects.filter(precio__range=(min_price, max_price))
+
+
+    def get_mas_vendidos_semana(self, limit=5):
+        semana_pasada = now() - timedelta(days=7)
+        productos_mas_vendidos = (
+            DetalleVenta.objects
+            .filter(venta__fecha__gte=semana_pasada)
+            .values('producto__id', 'producto__nombre')
+            .annotate(ventas_semana=Sum('cantidad'))
+            .order_by('-ventas_semana')[:limit]
+        )
+        return productos_mas_vendidos
+
+    def search_by_name_or_category(self, query):
+        return Producto.objects.filter(
+            Q(nombre__icontains=query) | Q(categoria__nombre__icontains=query)
+        )
+    def search(self, query):
+        return Producto.objects.filter(
+            Q(nombre__icontains=query) | 
+            Q(descripcion__icontains=query) |
+            Q(codigo_barras__icontains=query)
+        )
+        
+    def get_stock_bajo(self, threshold=3):
+        return Producto.objects.filter(stock__lt=threshold).order_by('stock')
 
     def create(
         self,

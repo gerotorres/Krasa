@@ -41,6 +41,7 @@ class Producto(models.Model):
     ubicacion_deposito = models.CharField(max_length=255, blank=True, null=True)
     marca = models.ForeignKey(Marca, on_delete=models.SET_NULL, null=True, blank=True)
     
+
     class Meta:
         db_table = "producto"
     

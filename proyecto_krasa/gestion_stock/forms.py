@@ -3,9 +3,31 @@ from .models import Producto, Venta
 from gestion_stock.models import Cliente, Proveedor, Marca, Categoria, Subcategoria, FormaPago, Venta
 
 class ProductoForm(forms.ModelForm):
+    categoria = forms.ModelChoiceField(
+        queryset=Categoria.objects.all(),
+        empty_label="Selecciona una categoría",
+        required=False
+    )
+    
+    subcategoria = forms.ModelChoiceField(
+        queryset=Subcategoria.objects.all(),
+        empty_label="Selecciona una subcategoría",
+        required=False
+    )
+    
+    marca = forms.ModelChoiceField(
+        queryset=Marca.objects.all(),
+        empty_label="Selecciona una marca",
+        required=False
+    )
+
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'precio', 'stock', 'categoria', 'subcategoria', 'codigo_barras', 'ubicacion_deposito', 'marca']
+        fields = [
+            'nombre', 'descripcion', 'precio', 'stock', 
+            'categoria', 'subcategoria', 'codigo_barras', 
+            'ubicacion_deposito', 'marca'
+        ]
 
 # 📌 Formulario para Cliente
 class ClienteForm(forms.ModelForm):

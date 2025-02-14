@@ -52,5 +52,5 @@ urlpatterns = [
     path('ventas/eliminar/<int:id>/', VentaDeleteView.as_view(), name='venta_eliminar'),
 
     # 📌 URL para la página principal (Index)
-    path('', TemplateView.as_view(template_name='index/index.html'), name='index'),
+    path('', TemplateView.as_view(template_name='home/index.html'), name='index'),
 ]
