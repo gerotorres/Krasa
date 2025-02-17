@@ -2,8 +2,25 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from gestion_stock.repositories.categoria import CategoriaRepository
 from gestion_stock.forms import CategoriaForm
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from gestion_stock.models import Categoria
+import json
 
 repo = CategoriaRepository()
+
+def agregar_categoria(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Cargar JSON enviado desde el frontend
+            nombre = data.get("nombre")
+            if nombre:
+                categoria, created = Categoria.objects.get_or_create(nombre=nombre)
+                return JsonResponse({"id": categoria.id, "nombre": categoria.nombre})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Formato JSON inválido"}, status=400)
+
+    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 class CategoriaListaView(View):
     def get(self, request):

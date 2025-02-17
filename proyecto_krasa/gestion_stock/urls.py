@@ -3,10 +3,11 @@ from django.views.generic import TemplateView
 from gestion_stock.views.cliente_view import ClienteListaView, ClienteCreateView, ClienteUpdateView, ClienteDeleteView
 from gestion_stock.views.proveedor_view import ProveedorListaView, ProveedorCreateView, ProveedorUpdateView, ProveedorDeleteView
 from gestion_stock.views.producto_view import ProductoListaView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView
-from gestion_stock.views.marca_view import MarcaListaView, MarcaCreateView, MarcaUpdateView, MarcaDeleteView
-from gestion_stock.views.categoria_view import CategoriaListaView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView
+from gestion_stock.views.marca_view import MarcaListaView, MarcaCreateView, MarcaUpdateView, MarcaDeleteView, agregar_marca
+from gestion_stock.views.categoria_view import CategoriaListaView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView, agregar_categoria
 from gestion_stock.views.subcategoria_view import SubcategoriaListaView, SubcategoriaCreateView, SubcategoriaUpdateView, SubcategoriaDeleteView
 from gestion_stock.views.venta_views import VentaListaView, VentaCreateView, VentaUpdateView, VentaDeleteView
+
 
 urlpatterns = [
     # 📌 URLs para Clientes
@@ -24,7 +25,7 @@ urlpatterns = [
     # 📌 URLs para Productos
     path('productos/', ProductoListaView.as_view(), name='producto_lista'),
     path('productos/crear/', ProductoCreateView.as_view(), name='producto_crear'),
-    path('productos/editar/<int:id>/', ProductoUpdateView.as_view(), name='producto_editar'),
+    path('productos/editar/<int:pk>/', ProductoUpdateView.as_view(), name='producto_editar'),
     path('productos/eliminar/<int:id>/', ProductoDeleteView.as_view(), name='producto_eliminar'),
 
     # 📌 URLs para Marcas
@@ -32,12 +33,14 @@ urlpatterns = [
     path('marcas/crear/', MarcaCreateView.as_view(), name='marca_crear'),
     path('marcas/editar/<int:id>/', MarcaUpdateView.as_view(), name='marca_editar'),
     path('marcas/eliminar/<int:id>/', MarcaDeleteView.as_view(), name='marca_eliminar'),
+    path("agregar_marca/", agregar_marca, name="agregar_marca"),
 
     # 📌 URLs para Categorías
     path('categorias/', CategoriaListaView.as_view(), name='categoria_lista'),
     path('categorias/crear/', CategoriaCreateView.as_view(), name='categoria_crear'),
     path('categorias/editar/<int:id>/', CategoriaUpdateView.as_view(), name='categoria_editar'),
     path('categorias/eliminar/<int:id>/', CategoriaDeleteView.as_view(), name='categoria_eliminar'),
+    path("agregar_categoria/", agregar_categoria, name="agregar_categoria"),
 
     # 📌 URLs para Subcategorías
     path('subcategorias/', SubcategoriaListaView.as_view(), name='subcategoria_lista'),

@@ -6,51 +6,54 @@
 <div class="container mt-5">
     <div class="bg-white p-4 rounded-lg shadow-lg">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="display-4 text-dark font-weight-bold">💅 {% trans "Inventario de Productos" %}</h1>
-            <p class="text-muted">🕒 {% trans "Hora actual:" %} <span id="current-time" class="font-weight-bold h4"></span></p>
+            <h1 class="display-4 text-primary fw-bold">🛒 {% trans "Inventario de Productos" %}</h1>
+            <p class="text-muted">🕒 {% trans "Hora actual:" %} <span id="current-time" class="fw-bold h4"></span></p>
         </div>
         
         {% if user.is_superuser or user.is_staff %}
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="{% url 'producto_crear' %}" class="btn btn-primary btn-lg shadow-sm">➕ {% trans "Añadir Producto" %}</a>
+            <a href="{% url 'producto_crear' %}" class="btn btn-success btn-lg shadow-sm">➕ {% trans "Añadir Producto" %}</a>
         </div>
         {% endif %}
-
-
 
         <!-- Formulario de búsqueda -->
         <form method="GET" action="" class="mb-4">
             <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="{% trans 'Buscar producto...' %}" value="{{ request.GET.q }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">🔍 {% trans "Buscar" %}</button>
-                </div>
+                <input type="text" name="q" class="form-control rounded-pill shadow-sm" placeholder="{% trans 'Buscar producto...' %}" value="{{ request.GET.q }}">
+                <button class="btn btn-outline-primary shadow-sm ms-2 rounded-pill" type="submit">🔍 {% trans "Buscar" %}</button>
             </div>
         </form>
 
         <div class="table-responsive">
-            <table class="table table-hover table-bordered shadow-sm">
-                <thead class="thead-light">
+            <table class="table table-hover table-bordered shadow-sm text-center align-middle">
+                <thead class="bg-primary text-white">
                     <tr>
+                        <th scope="col">{% trans "Código" %}</th>
                         <th scope="col">{% trans "Nombre" %}</th>
                         <th scope="col">{% trans "Categoría" %}</th>
                         <th scope="col">{% trans "Marca" %}</th>
                         <th scope="col">{% trans "Precio (USD)" %}</th>
                         <th scope="col">{% trans "Stock" %}</th>
-                        {% if user.is_authenticated %}
-                            {% if user.is_superuser or user.is_staff %}
-                                    <th scope="col">{% trans "Acciones" %}</th> 
-                        {% endif %}
-                        {% endif %}
+                        <th scope="col">{% trans "Acciones" %}</th> 
                     </tr>
                 </thead>
                 <tbody>
                     {% for producto in productos %}
-                    <tr>
+                    <tr class="clickable-row" data-bs-toggle="modal" data-bs-target="#productoModal"
+                        data-codigo="{{ producto.codigo_barras|default:'N/A' }}"
+                        data-nombre="{{ producto.nombre }}"
+                        data-categoria="{{ producto.categoria.nombre|default:'N/A' }}"
+                        data-subcategoria="{{ producto.subcategoria.nombre|default:'N/A' }}"
+                        data-marca="{{ producto.marca.nombre|default:'N/A' }}"
+                        data-precio="{{ producto.precio|floatformat:2 }}"
+                        data-stock="{{ producto.stock }}"
+                        data-ubicacion="{{ producto.ubicacion_deposito|default:'No especificada' }}"
+                        data-descripcion="{{ producto.descripcion|default:'Sin descripción' }}">
+                        <td>{{ producto.codigo_barras|default:'N/A' }}</td>
                         <td>{{ producto.nombre }}</td>
-                        <td>{{ producto.categoria.nombre }}</td>
-                        <td>{{ producto.marca }}</td>
-                        <td>{{ producto.precio|floatformat:2 }}</td>
+                        <td>{{ producto.categoria.nombre|default:'N/A' }}</td>
+                        <td>{{ producto.marca.nombre|default:'N/A' }}</td>
+                        <td>${{ producto.precio|floatformat:2 }}</td>
                         <td>{{ producto.stock }}</td>
                         <td>
                             <div class="btn-group" role="group">
@@ -65,22 +68,69 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table> 
+            </table>
         </div>
     </div>
+</div>
+
+<!-- Modal Moderno -->
+<div class="modal fade" id="productoModal" tabindex="-1" aria-labelledby="productoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="productoModalLabel">📦 {% trans "Detalles del Producto" %}</h5>
+        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>📌 {% trans "Código:" %}</strong> <span id="modal-codigo"></span></p>
+                <p><strong>🛍️ {% trans "Nombre:" %}</strong> <span id="modal-nombre"></span></p>
+                <p><strong>📂 {% trans "Categoría:" %}</strong> <span id="modal-categoria"></span></p>
+                <p><strong>🔖 {% trans "Subcategoría:" %}</strong> <span id="modal-subcategoria"></span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>🏷️ {% trans "Marca:" %}</strong> <span id="modal-marca"></span></p>
+                <p><strong>💲 {% trans "Precio (USD):" %}</strong> <span id="modal-precio"></span></p>
+                <p><strong>📦 {% trans "Stock:" %}</strong> <span id="modal-stock"></span></p>
+                <p><strong>📍 {% trans "Ubicación en Depósito:" %}</strong> <span id="modal-ubicacion"></span></p>
+            </div>
+        </div>
+        <hr>
+        <p><strong>📝 {% trans "Descripción:" %}</strong></p>
+        <p id="modal-descripcion" class="text-muted"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cerrar" %}</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
     function updateTime() {
         var now = new Date();
-        var hours = now.getHours().toString().padStart(2, '0');
-        var minutes = now.getMinutes().toString().padStart(2, '0');
-        var seconds = now.getSeconds().toString().padStart(2, '0');
-        var timeString = hours + ':' + minutes + ':' + seconds;
+        var timeString = now.toLocaleTimeString();
         document.getElementById('current-time').textContent = timeString;
     }
 
     setInterval(updateTime, 1000);
     updateTime();
+
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".clickable-row").forEach(function(row) {
+            row.addEventListener("click", function() {
+                document.getElementById("modal-codigo").textContent = row.getAttribute("data-codigo");
+                document.getElementById("modal-nombre").textContent = row.getAttribute("data-nombre");
+                document.getElementById("modal-categoria").textContent = row.getAttribute("data-categoria");
+                document.getElementById("modal-subcategoria").textContent = row.getAttribute("data-subcategoria");
+                document.getElementById("modal-marca").textContent = row.getAttribute("data-marca");
+                document.getElementById("modal-precio").textContent = "$" + row.getAttribute("data-precio");
+                document.getElementById("modal-stock").textContent = row.getAttribute("data-stock");
+                document.getElementById("modal-ubicacion").textContent = row.getAttribute("data-ubicacion");
+                document.getElementById("modal-descripcion").textContent = row.getAttribute("data-descripcion");
+            });
+        });
+    });
 </script>
 {% endblock %}

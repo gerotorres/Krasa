@@ -4,6 +4,9 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from datetime import datetime
 from django.db.models import Q
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.views.generic import UpdateView
 
 from gestion_stock.forms import ProductoForm  # Corregido
 from gestion_stock.models import Producto, Categoria, Subcategoria, Marca  # Corregido
@@ -72,39 +75,26 @@ class ProductoCreateView(View):
         )
 
     def post(self, request, *args, **kwargs):
-        form = ProductoForm(request.POST)  # Define form antes de usarlo
+        form = ProductoForm(request.POST)
         categorias = categoria_repo.get_all()
         subcategorias = subcategoria_repo.get_all()
         marcas = marca_repo.get_all()
 
         if form.is_valid():
-            nombre = form.cleaned_data["nombre"]
-            descripcion = form.cleaned_data["descripcion"]
-            precio = form.cleaned_data["precio"]
-            stock = form.cleaned_data["stock"]
-            categoria_id = form.cleaned_data["categoria"].id if form.cleaned_data["categoria"] else None
-            subcategoria_id = form.cleaned_data["subcategoria"].id if form.cleaned_data["subcategoria"] else None
             codigo_barras = form.cleaned_data["codigo_barras"]
-            ubicacion_deposito = form.cleaned_data["ubicacion_deposito"]
-            marca_id = form.cleaned_data["marca"].id if form.cleaned_data["marca"] else None
 
-            categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
-            subcategoria = Subcategoria.objects.get(id=subcategoria_id) if subcategoria_id else None
-            marca = Marca.objects.get(id=marca_id) if marca_id else None
-
-            Producto.objects.create(
-                nombre=nombre,
-                descripcion=descripcion,
-                precio=precio,
-                stock=stock,
-                categoria=categoria,
-                subcategoria=subcategoria,
-                codigo_barras=codigo_barras,
-                ubicacion_deposito=ubicacion_deposito,
-                marca=marca,
-            )
-
-            return redirect("producto_lista")  
+            # Verificar si ya existe un producto con ese código de barras
+            if Producto.objects.filter(codigo_barras=codigo_barras).exists():
+                messages.error(request, "⚠️ El producto con este código de barras ya existe.")
+            else:
+                producto = form.save(commit=False)  # No guardar aún para asignar relaciones
+                producto.categoria = Categoria.objects.get(id=form.cleaned_data["categoria"].id) if form.cleaned_data["categoria"] else None
+                producto.subcategoria = Subcategoria.objects.get(id=form.cleaned_data["subcategoria"].id) if form.cleaned_data["subcategoria"] else None
+                producto.marca = Marca.objects.get(id=form.cleaned_data["marca"].id) if form.cleaned_data["marca"] else None
+                
+                producto.save()
+                messages.success(request, "✅ Producto agregado correctamente.")
+                return redirect("producto_lista")  
 
         return render(
             request,
@@ -118,79 +108,56 @@ class ProductoCreateView(View):
         )
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
-class ProductoUpdateView(View):
-    def get(self, request, id):
-        producto = producto_repo.get_by_id(id)  # Corregido
-        if not producto:
-            return redirect('producto_lista')  # Evitar error si no existe
+class ProductoUpdateView(UpdateView):
+    model = Producto
+    form_class = ProductoForm
+    template_name = "productos/update.html"
+    success_url = reverse_lazy("producto_lista")
 
-        form = ProductoForm(instance=producto)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categorias"] = categoria_repo.get_all()
+        context["subcategorias"] = subcategoria_repo.get_all()
+        context["marcas"] = marca_repo.get_all()
+        return context
 
-        categorias = categoria_repo.get_all()
-        subcategorias = subcategoria_repo.get_all()
-        marcas = marca_repo.get_all()
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Asegurar que los valores iniciales se establezcan correctamente
+        form.fields["nombre"].initial = self.object.nombre
+        form.fields["descripcion"].initial = self.object.descripcion
+        form.fields["precio"].initial = self.object.precio
+        form.fields["categoria"].initial = self.object.categoria
+        form.fields["subcategoria"].initial = self.object.subcategoria
+        form.fields["codigo_barras"].initial = self.object.codigo_barras
+        form.fields["ubicacion_deposito"].initial = self.object.ubicacion_deposito
+        form.fields["marca"].initial = self.object.marca
+        return form
 
-        return render(
-            request,
-            'productos/update.html',
-            {
-                'form': form,
-                'categorias': categorias,
-                'subcategorias': subcategorias,
-                'marcas': marcas,
-            }
-        )
-
-    def post(self, request, id):
-        producto = producto_repo.get_by_id(id)  # Corregido
-        if not producto:
-            return redirect('producto_lista')
-
-        form = ProductoForm(request.POST, instance=producto)
-
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        stock_original = self.object.stock  # Mantener el stock original
+        
+        form = self.get_form()
         if form.is_valid():
+            producto_actualizado = form.save(commit=False)
+            
+            # Llamar al repositorio asegurando que 'stock' no cambie
             producto_repo.update(
-                producto=producto,
-                nombre=form.cleaned_data['nombre'],
-                descripcion=form.cleaned_data['descripcion'],
-                precio=form.cleaned_data['precio'],
-                stock=form.cleaned_data['stock'],
-                categoria=form.cleaned_data['categoria'],
-                subcategoria=form.cleaned_data['subcategoria'],
-                codigo_barras=form.cleaned_data['codigo_barras'],
-                ubicacion_deposito=form.cleaned_data['ubicacion_deposito'],
-                marca=form.cleaned_data['marca'],
+                producto_actualizado.id,
+                producto_actualizado.nombre,
+                producto_actualizado.descripcion,
+                producto_actualizado.precio,
+                producto_actualizado.categoria,
+                producto_actualizado.subcategoria,
+                producto_actualizado.codigo_barras,
+                producto_actualizado.ubicacion_deposito,
+                producto_actualizado.marca,
+                stock_original  # Pasamos el stock original
             )
-            return redirect('producto_lista')
 
-        categorias = categoria_repo.get_all()
-        subcategorias = subcategoria_repo.get_all()
-        marcas = marca_repo.get_all()
+            messages.success(request, "¡Producto actualizado correctamente!")
+            return redirect(self.success_url)
 
-        return render(
-            request,
-            'productos/update.html',
-            {
-                'form': form,
-                'categorias': categorias,
-                'subcategorias': subcategorias,
-                'marcas': marcas,
-            }
-        )
-
-class ProductoComentariosView(View):
-    def get(self, request, id):
-        producto = producto_repo.get_by_id(id)
-        if not producto:
-            return redirect('producto_lista')
-
-        comentarios = producto.comentarios.all() if hasattr(producto, 'comentarios') else []
-
-        return render(
-            request,
-            'productos/comentarios.html',
-            {
-                'producto': producto,
-                'comentarios': comentarios
-            }
-        )
+        messages.error(request, "Error al actualizar el producto.")
+        return self.form_invalid(form)

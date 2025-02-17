@@ -86,29 +86,18 @@ class ProductoRepository:
 
     def delete(self, producto: Producto):
         return producto.delete()
-
-    def update(
-        self,
-        producto: Producto,
-        nombre: str,
-        descripcion: Optional[str],
-        precio: float,
-        stock: int,
-        categoria: Optional[Categoria] = None,
-        subcategoria: Optional[Subcategoria] = None,
-        marca: Optional[Marca] = None,
-        codigo_barras: Optional[str] = None,
-        ubicacion_deposito: Optional[str] = None,
-    ) -> Producto:
+        
+    @staticmethod
+    def update(id, nombre, descripcion, precio, categoria, subcategoria, codigo_barras, ubicacion_deposito, marca, stock):
+        producto = Producto.objects.get(id=id)
         producto.nombre = nombre
         producto.descripcion = descripcion
         producto.precio = precio
-        producto.stock = stock
         producto.categoria = categoria
         producto.subcategoria = subcategoria
-        producto.marca = marca
         producto.codigo_barras = codigo_barras
         producto.ubicacion_deposito = ubicacion_deposito
-        
+        producto.marca = marca
+        producto.stock = stock  # Asegurar que el stock no se modifique
         producto.save()
         return producto

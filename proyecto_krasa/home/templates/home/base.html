@@ -15,10 +15,17 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Popper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <!-- Estilos personalizados -->
+
+    <!-- Estilos personalizados 
     <link rel="stylesheet" href="{% static 'home/css/styles.css' %}">
-    
+    -->
     {% block extra_css %}{% endblock %}
 
     <style>
@@ -85,3 +92,63 @@
     </footer>
 </body>
 </html>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("guardarCategoria").addEventListener("click", function() {
+            let nuevaCategoria = document.getElementById("nuevaCategoria").value.trim();
+            if (nuevaCategoria) {
+                fetch("{% url 'agregar_categoria' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({ "nombre": nuevaCategoria })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.id) {
+                        let selectCategoria = document.getElementById("id_categoria");
+                        let nuevaOpcion = document.createElement("option");
+                        nuevaOpcion.text = data.nombre;
+                        nuevaOpcion.value = data.id;
+                        selectCategoria.add(nuevaOpcion);
+                        selectCategoria.value = data.id;
+                        document.getElementById("nuevaCategoria").value = "";
+                        $("#categoriaModal").modal("hide");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });
+    
+        document.getElementById("guardarMarca").addEventListener("click", function() {
+            let nuevaMarca = document.getElementById("nuevaMarca").value.trim();
+            if (nuevaMarca) {
+                fetch("{% url 'agregar_marca' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({ "nombre": nuevaMarca })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.id) {
+                        let selectMarca = document.getElementById("id_marca");
+                        let nuevaOpcion = document.createElement("option");
+                        nuevaOpcion.text = data.nombre;
+                        nuevaOpcion.value = data.id;
+                        selectMarca.add(nuevaOpcion);
+                        selectMarca.value = data.id;
+                        document.getElementById("nuevaMarca").value = "";
+                        $("#marcaModal").modal("hide");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });
+    });
+    </script>
+    

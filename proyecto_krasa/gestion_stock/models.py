@@ -37,7 +37,7 @@ class Producto(models.Model):
     stock = models.IntegerField(null=False)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
     subcategoria = models.ForeignKey(Subcategoria, on_delete=models.SET_NULL, null=True, blank=True)
-    codigo_barras = models.CharField(max_length=20, null=True, blank=True)
+    codigo_barras = models.CharField(max_length=20, unique=True, null=True, blank=True)
     ubicacion_deposito = models.CharField(max_length=255, blank=True, null=True)
     marca = models.ForeignKey(Marca, on_delete=models.SET_NULL, null=True, blank=True)
     
