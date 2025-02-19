@@ -82,6 +82,19 @@
                     </select>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_proveedor" class="form-label">{% trans "Proveedor" %}</label>
+                    <select name="proveedor" id="id_proveedor" class="form-control">
+                        {% for proveedor in proveedores %}
+                            <option value="{{ proveedor.id }}" {% if proveedor.id == form.proveedor.value %}selected{% endif %}>
+                                {{ proveedor.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
 
             <div class="mb-3">
                 <label for="id_descripcion" class="form-label">{% trans "Descripción" %}</label>

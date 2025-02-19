@@ -1,12 +1,14 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from gestion_stock.views.cliente_view import ClienteListaView, ClienteCreateView, ClienteUpdateView, ClienteDeleteView
-from gestion_stock.views.proveedor_view import ProveedorListaView, ProveedorCreateView, ProveedorUpdateView, ProveedorDeleteView
-from gestion_stock.views.producto_view import ProductoListaView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView
+from gestion_stock.views.proveedor_view import ProveedorListaView, ProveedorCreateView, ProveedorUpdateView, ProveedorDeleteView, agregar_proveedor
+from gestion_stock.views.producto_view import ProductoListaView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView 
 from gestion_stock.views.marca_view import MarcaListaView, MarcaCreateView, MarcaUpdateView, MarcaDeleteView, agregar_marca
 from gestion_stock.views.categoria_view import CategoriaListaView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView, agregar_categoria
 from gestion_stock.views.subcategoria_view import SubcategoriaListaView, SubcategoriaCreateView, SubcategoriaUpdateView, SubcategoriaDeleteView
 from gestion_stock.views.venta_views import VentaListaView, VentaCreateView, VentaUpdateView, VentaDeleteView
+from gestion_stock.views.localidad_view import listar_localidades
+from gestion_stock.views.codigo_barras import verificar_codigo_barras
 
 
 urlpatterns = [
@@ -21,6 +23,7 @@ urlpatterns = [
     path('proveedores/crear/', ProveedorCreateView.as_view(), name='proveedor_crear'),
     path('proveedores/editar/<int:id>/', ProveedorUpdateView.as_view(), name='proveedor_editar'),
     path('proveedores/eliminar/<int:id>/', ProveedorDeleteView.as_view(), name='proveedor_eliminar'),
+    path('agregar_proveedor/', agregar_proveedor, name= 'agregar_proveedor'),
 
     # 📌 URLs para Productos
     path('productos/', ProductoListaView.as_view(), name='producto_lista'),
@@ -53,6 +56,9 @@ urlpatterns = [
     path('ventas/crear/', VentaCreateView.as_view(), name='venta_crear'),
     path('ventas/editar/<int:id>/', VentaUpdateView.as_view(), name='venta_editar'),
     path('ventas/eliminar/<int:id>/', VentaDeleteView.as_view(), name='venta_eliminar'),
+
+    path("listar_localidades/", listar_localidades, name="listar_localidades"),
+    path('verificar_codigo_barras/', verificar_codigo_barras, name='verificar_codigo_barras'),
 
     # 📌 URL para la página principal (Index)
     path('', TemplateView.as_view(template_name='home/index.html'), name='index'),

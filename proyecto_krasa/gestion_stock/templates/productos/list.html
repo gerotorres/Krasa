@@ -48,7 +48,8 @@
                         data-precio="{{ producto.precio|floatformat:2 }}"
                         data-stock="{{ producto.stock }}"
                         data-ubicacion="{{ producto.ubicacion_deposito|default:'No especificada' }}"
-                        data-descripcion="{{ producto.descripcion|default:'Sin descripción' }}">
+                        data-descripcion="{{ producto.descripcion|default:'Sin descripción' }}"
+                        data-proveedor="{{ producto.proveedor.nombre|default:'No especificado' }}">
                         <td>{{ producto.codigo_barras|default:'N/A' }}</td>
                         <td>{{ producto.nombre }}</td>
                         <td>{{ producto.categoria.nombre|default:'N/A' }}</td>
@@ -94,6 +95,7 @@
                 <p><strong>💲 {% trans "Precio (USD):" %}</strong> <span id="modal-precio"></span></p>
                 <p><strong>📦 {% trans "Stock:" %}</strong> <span id="modal-stock"></span></p>
                 <p><strong>📍 {% trans "Ubicación en Depósito:" %}</strong> <span id="modal-ubicacion"></span></p>
+                <p><strong>🏢 {% trans "Proveedor:" %}</strong> <span id="modal-proveedor"></span></p>
             </div>
         </div>
         <hr>
@@ -129,6 +131,7 @@
                 document.getElementById("modal-stock").textContent = row.getAttribute("data-stock");
                 document.getElementById("modal-ubicacion").textContent = row.getAttribute("data-ubicacion");
                 document.getElementById("modal-descripcion").textContent = row.getAttribute("data-descripcion");
+                document.getElementById("modal-proveedor").textContent = row.getAttribute("data-proveedor");
             });
         });
     });

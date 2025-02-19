@@ -9,16 +9,18 @@ from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 
 from gestion_stock.forms import ProductoForm  # Corregido
-from gestion_stock.models import Producto, Categoria, Subcategoria, Marca  # Corregido
+from gestion_stock.models import Producto, Categoria, Subcategoria, Marca, Proveedor
 from gestion_stock.repositories.producto import ProductoRepository
 from gestion_stock.repositories.categoria import CategoriaRepository
 from gestion_stock.repositories.subcategoria import SubcategoriaRepository
 from gestion_stock.repositories.marca import MarcaRepository
+from gestion_stock.repositories.proveedor import ProveedorRepository
 
 producto_repo = ProductoRepository()
 categoria_repo = CategoriaRepository()
 subcategoria_repo = SubcategoriaRepository()
 marca_repo = MarcaRepository()
+proveedor_repo = ProveedorRepository()
 
 class ProductoListaView(View):
     def get(self, request):
@@ -62,6 +64,8 @@ class ProductoCreateView(View):
         categorias = categoria_repo.get_all()
         subcategorias = subcategoria_repo.get_all()
         marcas = marca_repo.get_all()
+        proveedores =proveedor_repo.get_all()
+
 
         return render(
             request,
@@ -71,6 +75,7 @@ class ProductoCreateView(View):
                 'categorias': categorias,
                 'subcategorias': subcategorias,
                 'marcas': marcas,
+                'proveedores': proveedores,
             }
         )
 
@@ -79,6 +84,7 @@ class ProductoCreateView(View):
         categorias = categoria_repo.get_all()
         subcategorias = subcategoria_repo.get_all()
         marcas = marca_repo.get_all()
+        proveedores =proveedor_repo.get_all()
 
         if form.is_valid():
             codigo_barras = form.cleaned_data["codigo_barras"]
@@ -91,6 +97,7 @@ class ProductoCreateView(View):
                 producto.categoria = Categoria.objects.get(id=form.cleaned_data["categoria"].id) if form.cleaned_data["categoria"] else None
                 producto.subcategoria = Subcategoria.objects.get(id=form.cleaned_data["subcategoria"].id) if form.cleaned_data["subcategoria"] else None
                 producto.marca = Marca.objects.get(id=form.cleaned_data["marca"].id) if form.cleaned_data["marca"] else None
+                producto.proveedores = Proveedor.objects.get(id=form.cleaned_data["proveedor"].id) if form.cleaned_data["proveedor"] else None
                 
                 producto.save()
                 messages.success(request, "✅ Producto agregado correctamente.")
@@ -104,6 +111,7 @@ class ProductoCreateView(View):
                 "categorias": categorias,
                 "subcategorias": subcategorias,
                 "marcas": marcas,
+                'proveedores':  proveedores,
             }
         )
 
@@ -119,6 +127,7 @@ class ProductoUpdateView(UpdateView):
         context["categorias"] = categoria_repo.get_all()
         context["subcategorias"] = subcategoria_repo.get_all()
         context["marcas"] = marca_repo.get_all()
+        context["proveedores"] = proveedor_repo.get_all()
         return context
 
     def get_form(self, form_class=None):
@@ -132,6 +141,7 @@ class ProductoUpdateView(UpdateView):
         form.fields["codigo_barras"].initial = self.object.codigo_barras
         form.fields["ubicacion_deposito"].initial = self.object.ubicacion_deposito
         form.fields["marca"].initial = self.object.marca
+        form.fields["proveedor"].initial = self.object.proveedor
         return form
 
     def post(self, request, *args, **kwargs):
@@ -153,7 +163,8 @@ class ProductoUpdateView(UpdateView):
                 producto_actualizado.codigo_barras,
                 producto_actualizado.ubicacion_deposito,
                 producto_actualizado.marca,
-                stock_original  # Pasamos el stock original
+                stock_original,
+                producto_actualizado.proveedor
             )
 
             messages.success(request, "¡Producto actualizado correctamente!")

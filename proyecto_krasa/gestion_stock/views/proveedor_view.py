@@ -2,9 +2,27 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from gestion_stock.repositories.proveedor import ProveedorRepository
 from gestion_stock.forms import ProveedorForm
+from gestion_stock.models import Proveedor, Localidad
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 repo = ProveedorRepository()
 
+@csrf_exempt
+def agregar_proveedor(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        proveedor = Proveedor.objects.create(
+            nombre=data.get("nombre"),
+            direccion=data.get("direccion", ""),
+            telefono=data.get("telefono", ""),
+            email=data.get("email", ""),
+            localidad=Localidad.objects.get(id=data["localidad"]) if data.get("localidad") else None
+        )
+        return JsonResponse({"id": proveedor.id, "nombre": proveedor.nombre})
+    return JsonResponse({"error": "Método no permitido"}, status=405)
+        
 class ProveedorListaView(View):
     def get(self, request):
         proveedores = repo.get_all()

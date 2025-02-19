@@ -63,22 +63,35 @@
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="id_precio" class="form-label">{% trans "Precio (USD)" %}</label>
+                    <label for="id_precio" class="form-label">{% trans "Precio" %}</label>
                     <input type="number" step="0.01" name="precio" id="id_precio" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="id_stock" class="form-label">{% trans "Stock" %}</label>
-                    <input type="number" step="1" name="stock" id="id_stock" class="form-control" required>
+                    <input type="number" step="1" name="stock" id="id_stock" class="form-control" required pattern="[0-9]+" title="Solo se permiten números">
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="id_codigo_barras" class="form-label">{% trans "Código de Barras" %}</label>
-                    <input type="text" name="codigo_barras" id="id_codigo_barras" class="form-control">
+                    <input type="number" step="1" name="codigo_barras" id="id_codigo_barras" class="form-control" pattern="[0-9]+" title="Solo se permiten números">
+
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="id_ubicacion_deposito" class="form-label">{% trans "Ubicación en Depósito" %}</label>
                     <input type="text" name="ubicacion_deposito" id="id_ubicacion_deposito" class="form-control">
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="id_proveedor" class="form-label">{% trans "Proveedor" %}</label>
+                <div class="d-flex">
+                    <select name="proveedor" id="id_proveedor" class="form-control">
+                        <option value="">{% trans "Selecciona un proveedor" %}</option>
+                        {% for proveedor in proveedores %}
+                            <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm ml-2" data-toggle="modal" data-target="#proveedorModal">+</button>
                 </div>
             </div>
             <div class="mb-3">
@@ -87,6 +100,52 @@
             </div>
             <button type="submit" class="btn btn-success w-100">{% trans "Guardar" %}</button>
         </form>
+    </div>
+</div>
+
+
+
+<!-- Modal para Crear Proveedor -->
+<div class="modal fade" id="proveedorModal" tabindex="-1" aria-labelledby="proveedorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Proveedor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="proveedorForm">
+                    <div class="form-group">
+                        <label for="nuevoProveedor">Nombre</label>
+                        <input type="text" id="nuevoProveedor" class="form-control" placeholder="Nombre del proveedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="direccionProveedor">Dirección</label>
+                        <input type="text" id="direccionProveedor" class="form-control" placeholder="Dirección">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefonoProveedor">Teléfono</label>
+                        <input type="text" id="telefonoProveedor" class="form-control" placeholder="Teléfono">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailProveedor">Email</label>
+                        <input type="email" id="emailProveedor" class="form-control" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="localidadProveedor">Localidad</label>
+                        <select id="localidadProveedor" class="form-control">
+                            <option value="">Seleccione una localidad</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarProveedor()">Guardar</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -131,33 +190,145 @@
 </div>
 
 <script>
-    function guardarMarca() {
-        let nombre = document.getElementById("nuevaMarca").value;
-        if (!nombre) return;
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("id_codigo_barras").addEventListener("blur", function() {
+        let codigoBarras = this.value;
         
-        fetch("{% url 'agregar_marca' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({ nombre: nombre })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.id) {
-                let marcaSelect = document.getElementById("id_marca");
-                let nuevaOpcion = new Option(data.nombre, data.id);
-                marcaSelect.add(nuevaOpcion);
-                $("#marcaModal").modal("hide");
-            }
+        if (codigoBarras.trim() !== "") {
+            fetch(`/verificar_codigo_barras/?codigo_barras=${codigoBarras}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.existe) {
+                        alert("El código de barras ya está registrado. Intenta con otro.");
+                        this.value = ""; // Vacía el campo para obligar a ingresar otro código
+                        this.focus();
+                    }
+                })
+                .catch(error => console.error("Error al verificar código de barras:", error));
+        }
+    });
+        cargarLocalidades();
+        configurarFiltroSubcategorias();
+    });
+
+    function configurarFiltroSubcategorias() {
+        let categoriaSelect = document.getElementById("id_categoria");
+        let subcategoriaSelect = document.getElementById("id_subcategoria");
+
+        categoriaSelect.addEventListener("change", function() {
+            let categoriaSeleccionada = categoriaSelect.value;
+
+            // Primero, mostramos solo las subcategorías correspondientes
+            Array.from(subcategoriaSelect.options).forEach(option => {
+                if (option.value === "") {
+                    option.hidden = false; // Mantenemos la opción de "Selecciona una subcategoría"
+                } else if (option.getAttribute("data-categoria") === categoriaSeleccionada) {
+                    option.hidden = false; // Mostrar si pertenece a la categoría seleccionada
+                } else {
+                    option.hidden = true; // Ocultar si no pertenece
+                }
+            });
+
+            // Opcional: Reiniciar la selección para que no quede una opción inválida seleccionada
+            subcategoriaSelect.value = "";
         });
     }
 
-    function guardarCategoria() {
+    function cargarLocalidades() {
+        fetch("{% url 'listar_localidades' %}") 
+        .then(response => response.json())
+        .then(data => {
+            let localidadSelect = document.getElementById("localidadProveedor");
+            localidadSelect.innerHTML = '<option value="">Seleccione una localidad</option>';
+            data.forEach(localidad => {
+                let option = new Option(localidad.nombre, localidad.id);
+                localidadSelect.add(option);
+            });
+        });
+    }
+
+    function guardarProveedor() {
+    let nombre = document.getElementById("nuevoProveedor").value;
+    let direccion = document.getElementById("direccionProveedor").value;
+    let telefono = document.getElementById("telefonoProveedor").value;
+    let email = document.getElementById("emailProveedor").value;
+    let localidad = document.getElementById("localidadProveedor").value;
+
+    if (!nombre) {
+        alert("El nombre es obligatorio");
+        return;
+    }
+
+    let datos = {
+        nombre: nombre,
+        direccion: direccion,
+        telefono: telefono,
+        email: email,
+        localidad: localidad ? parseInt(localidad) : null
+    };
+
+    fetch("{% url 'agregar_proveedor' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify(datos)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            let proveedorSelect = document.getElementById("id_proveedor");
+            let nuevaOpcion = new Option(data.nombre, data.id);
+            proveedorSelect.add(nuevaOpcion);
+            
+            // Cerrar modal correctamente
+            $("#proveedorModal").modal("hide");
+            
+            // Limpiar formulario
+            document.getElementById("proveedorForm").reset();
+        } else {
+            alert("Error al guardar el proveedor.");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+
+function guardarMarca() {
+    let nombre = document.getElementById("nuevaMarca").value;
+    if (!nombre) return;
+
+    fetch("{% url 'agregar_marca' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ nombre: nombre })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            let marcaSelect = document.getElementById("id_marca");
+            let nuevaOpcion = new Option(data.nombre, data.id);
+            marcaSelect.add(nuevaOpcion);
+
+            // Cerrar modal correctamente
+            $("#marcaModal").modal("hide");
+
+            // Limpiar campo de entrada
+            document.getElementById("nuevaMarca").value = "";
+        } else {
+            alert("Error al agregar la marca.");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+
+function guardarCategoria() {
     let nombre = document.getElementById("nuevaCategoria").value;
     if (!nombre) return;
-    
+
     fetch("{% url 'agregar_categoria' %}", {  
         method: "POST",
         headers: {
@@ -172,10 +343,14 @@
             let categoriaSelect = document.getElementById("id_categoria");
             let nuevaOpcion = new Option(data.nombre, data.id);
             categoriaSelect.add(nuevaOpcion);
+
+            // Cerrar modal correctamente
             $("#categoriaModal").modal("hide");
-            document.getElementById("nuevaCategoria").value = ""; // Limpiar campo
+
+            // Limpiar campo de entrada
+            document.getElementById("nuevaCategoria").value = "";
         } else {
-            alert("Error al agregar la categoría");
+            alert("Error al agregar la categoría.");
         }
     })
     .catch(error => console.error("Error:", error));

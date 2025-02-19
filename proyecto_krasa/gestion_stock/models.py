@@ -30,6 +30,20 @@ class Marca(models.Model):
     def __str__(self):
         return self.nombre
 
+class Proveedor(models.Model):
+    nombre = models.CharField(max_length=200, null=False)
+    direccion = models.CharField(max_length=255, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    localidad = models.ForeignKey('Localidad', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    class Meta:
+        db_table = "proveedor"
+    
+    def __str__(self):
+        return self.nombre
+
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=200, null=False)
     descripcion = models.TextField(blank=True, null=True)
@@ -40,8 +54,7 @@ class Producto(models.Model):
     codigo_barras = models.CharField(max_length=20, unique=True, null=True, blank=True)
     ubicacion_deposito = models.CharField(max_length=255, blank=True, null=True)
     marca = models.ForeignKey(Marca, on_delete=models.SET_NULL, null=True, blank=True)
-    
-
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True) 
     class Meta:
         db_table = "producto"
     
@@ -61,18 +74,6 @@ class Cliente(models.Model):
     def __str__(self):
         return self.nombre
 
-class Proveedor(models.Model):
-    nombre = models.CharField(max_length=200, null=False)
-    direccion = models.CharField(max_length=255, blank=True, null=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    localidad = models.ForeignKey('Localidad', on_delete=models.SET_NULL, null=True, blank=True)
-    
-    class Meta:
-        db_table = "proveedor"
-    
-    def __str__(self):
-        return self.nombre
 
 class FormaPago(models.Model):
     tipo_pago = models.CharField(max_length=100, unique=True)
@@ -87,14 +88,23 @@ class Venta(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-    forma_pago = models.ForeignKey(FormaPago, on_delete=models.SET_NULL, null=True) 
 
     class Meta:
         db_table = "venta"
 
     def __str__(self):
-        return f"Venta {self.id} - Cliente: {self.cliente.nombre if self.cliente else 'Sin cliente'} - Pago: {self.forma_pago.descripcion if self.forma_pago else 'No especificado'}"
+        return f"Venta {self.id} - Cliente: {self.cliente.nombre if self.cliente else 'Sin cliente'}"
 
+class VentaFormaPago(models.Model):
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
+    forma_pago = models.ForeignKey(FormaPago, on_delete=models.CASCADE)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+
+    class Meta:
+        db_table = "venta_forma_pago"
+
+    def __str__(self):
+        return f"Venta {self.venta.id} - {self.forma_pago.tipo_pago} - ${self.monto}"
 class Compra(models.Model):
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True)
     fecha = models.DateTimeField(auto_now_add=True)

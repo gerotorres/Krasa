@@ -21,12 +21,18 @@ class ProductoForm(forms.ModelForm):
         required=False
     )
 
+    proveedor = forms.ModelChoiceField(  
+        queryset=Proveedor.objects.all(),
+        empty_label="Selecciona un proveedor",
+        required=False
+    )
+
     class Meta:
         model = Producto
         fields = [
             'nombre', 'descripcion', 'precio', 'stock', 
             'categoria', 'subcategoria', 'codigo_barras', 
-            'ubicacion_deposito', 'marca'
+            'ubicacion_deposito', 'marca', 'proveedor'
         ]
 
 # 📌 Formulario para Cliente
@@ -87,9 +93,8 @@ class SubcategoriaForm(forms.ModelForm):
 class VentaForm(forms.ModelForm):
     class Meta:
         model = Venta
-        fields = ['cliente', 'total', 'forma_pago']
+        fields = ['cliente', 'total']
         widgets = {
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'total': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total'}),
-            'forma_pago': forms.Select(attrs={'class': 'form-control'}),
         }
