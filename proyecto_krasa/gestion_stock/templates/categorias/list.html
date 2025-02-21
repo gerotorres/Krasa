@@ -2,16 +2,41 @@
 {% load i18n %}
 
 {% block content %}
+<style>
+    /* Encabezado de la tabla en color rosado */
+.table thead {
+    background-color: #ffb6c1 !important; /* Rosa pastel */
+    color: rgb(0, 0, 0) !important;
+}
+
+/* Estilos para el botón de Editar */
+.btn-warning {
+    background-color: #ffb6c1 !important; /* Rosa fuerte */
+    border-color: #ffb6c1 !important;
+    color: rgb(0, 0, 0) !important;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-warning:hover {
+    background-color: #ff1493 !important; /* Rosa oscuro */
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(255, 20, 147, 0.3);
+}
+.text {
+    color : #ff1493 ;
+}
+
+</style>
 <div class="container mt-5">
     <div class="bg-white p-4 rounded-lg shadow-lg">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="display-4 text-primary fw-bold">📂 {% trans "Categorías" %}</h1>
+            <h1 class="display-4 text fw-bold">📂 {% trans "Categorías" %}</h1>
         </div>
 
-
-<div class="container mt-4">
+    {% if user.is_superuser or user.is_staff %}
+    <div class="container mt-4">
     <h2>Gestión de Categorías y Subcategorías</h2>
-
     <!-- Formulario para agregar categoría -->
     <div class="card mb-4">
         <div class="card-header">Agregar Nueva Categoría</div>
@@ -19,11 +44,12 @@
             <form id="form-categoria">
                 <div class="input-group">
                     <input type="text" id="nombre-categoria" class="form-control" placeholder="Nombre de la categoría" required>
-                    <button type="submit" class="btn btn-primary">Agregar</button>
+                    <button type="submit" class="btn btn-warning">Agregar</button>
                 </div>
             </form>
         </div>
     </div>
+    
 
     <!-- Formulario para agregar subcategoría -->
     <div class="card mb-4">
@@ -38,12 +64,12 @@
                         <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit" class="btn btn-primary">Agregar</button>
+                    <button type="submit" class="btn btn-warning">Agregar</button>
                 </div>
             </form>
         </div>
     </div>
-
+    {% endif %}
 
         <div class="table-responsive">
             <table class="table table-hover table-bordered shadow-sm text-center align-middle">
@@ -51,7 +77,9 @@
                     <tr>
                         <th scope="col">{% trans "Nombre de la Categoría" %}</th>
                         <th scope="col">{% trans "Subcategorías" %}</th>
+                        {% if user.is_superuser or user.is_staff %}
                         <th scope="col">{% trans "Acciones" %}</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -65,6 +93,7 @@
                                 <span class="text-muted">{% trans "Sin subcategorías" %}</span>
                             {% endfor %}
                         </td>
+                        {% if user.is_superuser or user.is_staff %}
                         <td>
                             <div class="btn-group">
                                 <a href="{% url 'categoria_editar' categoria.id %}" class="btn btn-warning btn-sm">✏️ {% trans "Editar" %}</a>
@@ -73,10 +102,10 @@
                                 <form method="post" action="{% url 'categoria_eliminar' categoria.id %}" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{% trans "¿Estás seguro de que deseas eliminar esta categoría?" %}|escapejs')">🗑️ {% trans "Eliminar" %}</button>
-
                                 </form>
                             </div>
                         </td>
+                        {% endif %}
                     </tr>
                     {% empty %}
                     <tr>

@@ -52,11 +52,11 @@ class ProductoListaView(View):
         )
 
 class ProductoDeleteView(View):
-    def get(self, request, id):
-        producto = producto_repo.get_by_id(id=id)
-        if producto:
-            producto_repo.delete(producto=producto)
-        return redirect('producto_lista')
+    def post(self, request, id):
+        producto = get_object_or_404(Producto, id=id)  # Obtiene el producto o lanza un error 404
+        producto.delete()  # Elimina el producto
+        messages.success(request, "El producto ha sido eliminado correctamente.")  # Mensaje de éxito
+        return redirect('producto_lista')  # Redirige a la lista de productos
 
 class ProductoCreateView(View):
     def get(self, request):

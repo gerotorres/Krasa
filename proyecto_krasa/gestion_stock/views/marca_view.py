@@ -39,20 +39,20 @@ class MarcaListaView(View):
 class MarcaCreateView(View):
     def get(self, request):
         form = MarcaForm()
-        return render(request, 'marca/marca_create.html', {'form': form})
+        return render(request, 'marca/create.html', {'form': form})
 
     def post(self, request):
         form = MarcaForm(request.POST)
         if form.is_valid():
             repo.create(nombre=form.cleaned_data['nombre'])
             return redirect('marca_lista')
-        return render(request, 'productos/marca_create.html', {'form': form})
+        return render(request, 'marca/create.html', {'form': form})
 
 class MarcaUpdateView(View):
     def get(self, request, id):
         marca = get_object_or_404(Marca, id=id)  # Usar Modelo directo
         form = MarcaForm(instance=marca)
-        return render(request, 'productos/marca_update.html', {'form': form, 'marca': marca})
+        return render(request, 'marca/update.html', {'form': form, 'marca': marca})
 
     def post(self, request, id):
         marca = get_object_or_404(Marca, id=id)  # Usar Modelo directo
@@ -60,11 +60,11 @@ class MarcaUpdateView(View):
         if form.is_valid():
             form.save()  # Usar el método save() en lugar de repo.update
             return redirect('marca_lista')
-        return render(request, 'productos/marca_update.html', {'form': form, 'marca': marca})
+        return render(request, 'marca/update.html', {'form': form, 'marca': marca})
 
 class MarcaDeleteView(View):
-    def get(self, request, id):
-        marca = get_object_or_404(Marca, id=id)  # Usar Modelo directo
+    def post(self, request, id):
+        marca = get_object_or_404(Marca, id=id)
         marca.delete()
         return redirect('marca_lista')
 

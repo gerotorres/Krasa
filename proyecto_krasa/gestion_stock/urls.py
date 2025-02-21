@@ -61,7 +61,7 @@ urlpatterns = [
 
     path("listar_localidades/", listar_localidades, name="listar_localidades"),
     path('verificar_codigo_barras/', verificar_codigo_barras, name='verificar_codigo_barras'),
-
+    
     # 📌 URL para la página principal (Index)
     path('', TemplateView.as_view(template_name='home/index.html'), name='index'),
 ]

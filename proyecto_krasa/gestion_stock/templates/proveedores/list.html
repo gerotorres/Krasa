@@ -1,0 +1,172 @@
+{% extends 'home/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<style>
+    /* Encabezado de la tabla en color rosado */
+    .table thead {
+    background-color: #ffb6c1 !important; /* Rosa pastel */
+    color: rgb(0, 0, 0) !important;
+}
+
+/* Estilos para el botón de Editar */
+.btn-warning {
+    background-color: #ffb6c1 !important; /* Rosa fuerte */
+    border-color: #ffb6c1 !important;
+    color: rgb(0, 0, 0) !important;
+    font-weight: bold;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-warning:hover {
+    background-color: #ff1493 !important; /* Rosa oscuro */
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(255, 20, 147, 0.3);
+}
+
+.text {
+    color : #ff1493 ;
+}
+
+</style>
+<div class="container mt-5">
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4 text fw-bold">📦 {% trans "Proveedores" %}</h1>
+        </div>
+
+        <!-- Formulario para agregar proveedor -->
+        {% if user.is_superuser or user.is_staff %}
+        <div class="card mb-4">
+            <div class="card-header">Agregar Nuevo Proveedor</div>
+            <div class="card-body">
+                <form id="form-proveedor">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <input type="text" id="nombre-proveedor" class="form-control" placeholder="Nombre" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" id="direccion-proveedor" class="form-control" placeholder="Dirección">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" id="telefono-proveedor" class="form-control" placeholder="Teléfono">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="email" id="email-proveedor" class="form-control" placeholder="Email">
+                        </div>
+                        <div class="col-md-4">
+                            <select id="localidad-proveedor" class="form-select" required>
+                                <option value="">Seleccione una localidad</option>
+                                {% for localidad in localidades %}
+                                <option value="{{ localidad.id }}">{{ localidad.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-warning w-100">Agregar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tabla de proveedores -->
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered shadow-sm text-center align-middle">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>{% trans "Nombre" %}</th>
+                        <th>{% trans "Dirección" %}</th>
+                        <th>{% trans "Teléfono" %}</th>
+                        <th>{% trans "Email" %}</th>
+                        <th>{% trans "Localidad" %}</th>
+                        {% if user.is_superuser or user.is_staff %}
+                        <th>{% trans "Acciones" %}</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proveedor in proveedores %}
+                    <tr>
+                        <td>{{ proveedor.nombre }}</td>
+                        <td>{{ proveedor.direccion|default:"-" }}</td>
+                        <td>{{ proveedor.telefono|default:"-" }}</td>
+                        <td>{{ proveedor.email|default:"-" }}</td>
+                        <td>{{ proveedor.localidad.nombre|default:"-" }}</td>
+                        {% if user.is_superuser or user.is_staff %}
+                        <td>
+                            <div class="btn-group">
+                                
+                                <a href="{% url 'proveedor_editar' proveedor.id %}" class="btn btn-warning btn-sm">✏️ {% trans "Editar" %}</a>
+                                <form method="post" action="{% url 'proveedor_eliminar' proveedor.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{% trans "¿Estás seguro de que deseas eliminar este proveedor?" %}')">🗑️ {% trans "Eliminar" %}</button>
+                                </form>
+                                
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-muted">{% trans "No hay proveedores registrados" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('form-proveedor').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let nombre = document.getElementById('nombre-proveedor').value;
+        let direccion = document.getElementById('direccion-proveedor').value;
+        let telefono = document.getElementById('telefono-proveedor').value;
+        let email = document.getElementById('email-proveedor').value;
+        let localidad = document.getElementById('localidad-proveedor').value;
+        
+        fetch("{% url 'agregar_proveedor' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ nombre, direccion, telefono, email, localidad })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                location.reload();
+            } else {
+                alert("Error al agregar proveedor");
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        cargarLocalidades();
+    });
+
+    function cargarLocalidades() {
+    fetch("{% url 'listar_localidades' %}") // Usamos la vista que ya tienes
+    .then(response => response.json())
+    .then(data => {
+        let select = document.getElementById('localidad-proveedor'); // CORREGIDO
+        select.innerHTML = '<option value="">Seleccione una localidad</option>'; // Limpia y añade la opción por defecto
+        data.forEach(localidad => {
+            let option = document.createElement('option');
+            option.value = localidad.id;
+            option.textContent = localidad.nombre;
+            select.appendChild(option);
+        });
+    })
+    .catch(error => console.error("Error al cargar localidades:", error));
+}
+
+</script>
+
+</script>
+{% endblock %}

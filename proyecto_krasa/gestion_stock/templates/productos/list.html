@@ -3,10 +3,46 @@
 {% load i18n %}
 
 {% block content %}
+<style>
+    .bg-white {
+        background-color: #ffffff!important; /* Blanco muy suave */
+        border-radius: 10px !important; /* Bordes redondeados */
+        padding: 20px;
+    }
+        /* Encabezado de la tabla en color rosado */
+    .table thead {
+    background-color: #ffb6c1 !important; /* Rosa pastel */
+    color: rgb(0, 0, 0) !important;
+}
+
+.modal-header {
+    background-color: #ffb6c1 !important; /* Rosa pastel */
+    color: rgb(0, 0, 0) !important;
+}
+
+    /* Estilos para el botón de Editar */
+    .btn-warning {
+        background-color: #ffb6c1 !important; /* Rosa fuerte */
+        border-color: #ffb6c1 !important;
+        color: rgb(0, 0, 0) !important;
+        font-weight: bold;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-warning:hover {
+        background-color: #ff1493 !important; /* Rosa oscuro */
+        transform: scale(1.05);
+        box-shadow: 0px 4px 10px rgba(255, 20, 147, 0.3);
+    }
+
+    .text {
+        color : #ff1493 ;
+    }
+</style>
 <div class="container mt-5">
-    <div class="bg-white p-4 rounded-lg shadow-lg">
+    <div class="interior bg-white p-4 rounded-lg shadow-lg">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="display-4 text-primary fw-bold">🛒 {% trans "Inventario de Productos" %}</h1>
+            <h1 class="display-4 text fw-bold">🛒 {% trans "Inventario de Productos" %}</h1>
             <p class="text-muted">🕒 {% trans "Hora actual:" %} <span id="current-time" class="fw-bold h4"></span></p>
         </div>
         
@@ -20,7 +56,7 @@
         <form method="GET" action="" class="mb-4">
             <div class="input-group">
                 <input type="text" name="q" class="form-control rounded-pill shadow-sm" placeholder="{% trans 'Buscar producto...' %}" value="{{ request.GET.q }}">
-                <button class="btn btn-outline-primary shadow-sm ms-2 rounded-pill" type="submit">🔍 {% trans "Buscar" %}</button>
+                <button class="btn btn-warning shadow-sm ms-2 rounded-pill" type="submit">🔍 {% trans "Buscar" %}</button>
             </div>
         </form>
 
@@ -34,7 +70,9 @@
                         <th scope="col">{% trans "Marca" %}</th>
                         <th scope="col">{% trans "Precio (USD)" %}</th>
                         <th scope="col">{% trans "Stock" %}</th>
+                        {% if user.is_superuser or user.is_staff %}
                         <th scope="col">{% trans "Acciones" %}</th> 
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -56,16 +94,23 @@
                         <td>{{ producto.marca.nombre|default:'N/A' }}</td>
                         <td>${{ producto.precio|floatformat:2 }}</td>
                         <td>{{ producto.stock }}</td>
+                        {% if user.is_superuser or user.is_staff %}
                         <td>
                             <div class="btn-group" role="group">
                                 {% if user.is_authenticated %}
-                                    {% if user.is_superuser or user.is_staff %}
+                                    
                                         <a href="{% url 'producto_editar' producto.id %}" class="btn btn-warning btn-sm">✏️ {% trans "Editar" %}</a>
-                                        <a href="{% url 'producto_eliminar' producto.id %}" class="btn btn-danger btn-sm">🗑️ {% trans "Eliminar" %}</a>
+                                        <form method="post" action="{% url 'producto_eliminar' producto.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{% trans "¿Estás seguro de que deseas eliminar este producto?" %}')">
+                                                🗑️ {% trans "Eliminar" %}
+                                            </button>
+                                        </form>
                                     {% endif %}
-                                {% endif %}
+                                
                             </div>
-                        </td>                        
+                        </td>     
+                        {% endif %}                   
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -78,7 +123,7 @@
 <div class="modal fade" id="productoModal" tabindex="-1" aria-labelledby="productoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
+      <div class="modal-header  text-white">
         <h5 class="modal-title" id="productoModalLabel">📦 {% trans "Detalles del Producto" %}</h5>
         <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>

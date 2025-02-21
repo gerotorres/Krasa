@@ -2,32 +2,79 @@
 {% load static %}
 
 {% block content %}
-<div class="bg-image vh-100 d-flex flex-column">
-    <div class="fondo text-white text-center py-5" style="background-color: #ff99aa;">
-        <h1 class="display-4">Bienvenido{% if user.is_authenticated %} {{ user }}{% endif %}</h1>
-        <h2 class="lead">A Tienda Krása</h2>
+<style>
+    .bg-image {
+        background: url("{% static 'images/fondo_doodles.webp' %}") repeat;
+        min-height: 100vh;
+    }
+    .fondo {
+        background: rgba(255, 153, 170, 0.9);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+        color: #4a4a4a;
+    }
+    .btn-custom {
+        border-radius: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffb3c1, #ff6699);
+        border: none;
+        color: white;
+    }
+    .btn-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+    }
+    .list-group-item {
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255);
+        border: none;
+        margin-bottom: 10px;
+    }
+    .section-title {
+        color: #4a4a4a;
+        font-weight: bold;
 
+        font-size: 1.5rem;
+        background: rgba(255, 204, 213); /* Color rosa suave con transparencia */
+        padding: 10px 20px;
+        border-radius: 12px;
+        display: inline-block;
+    }
+
+    .fondo {
+        background: rgba(255, 204, 213);
+    }
+
+</style>
+
+<div class="bg-image d-flex flex-column justify-content-center align-items-center p-4">
+    <div class="fondo text-center w-75">
+        <h1 class="display-4">Bienvenido{% if user.is_authenticated %} {{ user }}{% endif %}</h1>
+        <h1 class="lead">A Tienda Krása</h1>
     </div>
 
-    <div class="container my-4">
-        <div class="row g-3">
+    <div class="container my-5">
+        <div class="row g-3 justify-content-center">
             <div class="col-md-4">
-                <a href="{% url 'venta_lista' %}" class="btn w-100 p-4" style="background-color: #ffccd5; color: white;">Ventas</a>
+                <button class="btn btn-custom w-100 p-4">Próximamente Ventas</button>
             </div>
             <div class="col-md-4">
-                <a href="{% url 'producto_lista' %}" class="btn w-100 p-4" style="background-color: #ff99aa; color: white;">Productos</a>
+                <a href="{% url 'producto_lista' %}" class="btn btn-custom w-100 p-4">Productos</a>
             </div>
             <div class="col-md-4">
-                <a href="{% url 'cliente_lista' %}" class="btn w-100 p-4" style="background-color: #ff6688; color: white;">Clientes</a>
+                <button class="btn btn-custom w-100 p-4">Próximamente Clientes</button>
             </div>
             <div class="col-md-4">
-                <a href="{% url 'proveedor_lista' %}" class="btn w-100 p-4" style="background-color: #ff3366; color: white;">Proveedores</a>
+                <a href="{% url 'proveedor_lista' %}" class="btn btn-custom w-100 p-4">Proveedores</a>
             </div>
             <div class="col-md-4">
-                <a href="{% url 'categoria_list' %}" class="btn w-100 p-4" style="background-color: #ff0044; color: white;">Categorías</a>
+                <a href="{% url 'categoria_list' %}" class="btn btn-custom w-100 p-4">Categorías</a>
             </div>
             <div class="col-md-4">
-                <a href="{% url 'marca_lista' %}" class="btn w-100 p-4" style="background-color: #cc0033; color: white;">Marcas</a>
+                <a href="{% url 'marca_lista' %}" class="btn btn-custom w-100 p-4">Marcas</a>
             </div>
         </div>
     </div>
@@ -35,7 +82,7 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6">
-                <h3 class="text-center">Productos más vendidos de la semana</h3>
+                <h3 class="text-center section-title">Productos más vendidos de la semana</h3>
                 <ul class="list-group">
                     {% for producto in productos_mas_vendidos %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -43,12 +90,12 @@
                             <span class="badge bg-success">{{ producto.ventas_semana }} vendidos</span>
                         </li>
                     {% empty %}
-                        <li class="list-group-item">No hay datos disponibles</li>
+                        <li class="list-group-item text-center">No hay datos disponibles</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="col-md-6">
-                <h3 class="text-center">Productos con stock bajo</h3>
+                <h3 class="text-center section-title">Productos con stock bajo</h3>
                 <ul class="list-group">
                     {% for producto in productos_stock_bajo %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -56,7 +103,7 @@
                             <span class="badge bg-danger">{{ producto.stock }} en stock</span>
                         </li>
                     {% empty %}
-                        <li class="list-group-item">No hay productos con stock bajo</li>
+                        <li class="list-group-item text-center">No hay productos con stock bajo</li>
                     {% endfor %}
                 </ul>
             </div>

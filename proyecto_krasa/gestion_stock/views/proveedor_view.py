@@ -9,6 +9,11 @@ import json
 
 repo = ProveedorRepository()
 
+def obtener_localidades(request):
+    localidades = Localidad.objects.all().values('id', 'nombre')
+    return JsonResponse(list(localidades), safe=False)
+
+
 @csrf_exempt
 def agregar_proveedor(request):
     if request.method == "POST":
@@ -28,7 +33,7 @@ class ProveedorListaView(View):
         proveedores = repo.get_all()
         return render(
             request,
-            'proveedores/proveedor_list.html',
+            'proveedores/list.html',
             {'proveedores': proveedores}
         )
 
@@ -37,7 +42,7 @@ class ProveedorCreateView(View):
         form = ProveedorForm()
         return render(
             request,
-            'proveedores/proveedor_create.html',
+            'proveedores/create.html',
             {'form': form}
         )
 
@@ -55,7 +60,7 @@ class ProveedorCreateView(View):
 
         return render(
             request,
-            'proveedores/proveedor_create.html',
+            'proveedores/create.html',
             {'form': form}
         )
 
@@ -65,7 +70,7 @@ class ProveedorUpdateView(View):
         form = ProveedorForm(instance=proveedor)
         return render(
             request,
-            'proveedores/proveedor_update.html',
+            'proveedores/update.html',
             {'form': form}
         )
 
@@ -85,12 +90,12 @@ class ProveedorUpdateView(View):
 
         return render(
             request,
-            'proveedores/proveedor_update.html',
+            'proveedores/update.html',
             {'form': form}
         )
 
 class ProveedorDeleteView(View):
-    def get(self, request, id):
+    def post(self, request, id):
         proveedor = repo.get_by_id(id=id)
         if proveedor:
             repo.delete(proveedor=proveedor)

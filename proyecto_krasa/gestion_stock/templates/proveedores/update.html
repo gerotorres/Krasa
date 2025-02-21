@@ -1,0 +1,60 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <h2 class="text-dark font-weight-bold mb-4">{% trans "Editar Proveedor" %}</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_nombre" class="form-label">{% trans "Nombre del Proveedor" %}</label>
+                    <input type="text" name="nombre" id="id_nombre" class="form-control" value="{{ form.nombre.value }}" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="id_direccion" class="form-label">{% trans "Dirección" %}</label>
+                    <input type="text" name="direccion" id="id_direccion" class="form-control" value="{{ form.direccion.value }}">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="id_telefono" class="form-label">{% trans "Teléfono" %}</label>
+                    <input type="text" name="telefono" id="id_telefono" class="form-control" value="{{ form.telefono.value }}">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="id_email" class="form-label">{% trans "Email" %}</label>
+                    <input type="email" name="email" id="id_email" class="form-control" value="{{ form.email.value }}">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="id_localidad" class="form-label">{% trans "Localidad" %}</label>
+                    <select name="localidad" id="id_localidad" class="form-select">
+                        {% for localidad in form.fields.localidad.queryset %}
+                            <option value="{{ localidad.id }}" {% if localidad.id == form.localidad.value %}selected{% endif %}>
+                                {{ localidad.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">{% trans "Actualizar Proveedor" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

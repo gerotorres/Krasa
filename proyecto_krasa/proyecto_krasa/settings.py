@@ -112,6 +112,12 @@ USE_I18N = True
 
 USE_TZ = True
 
+STATIC_URL = '/static/'
+
+
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Carpeta donde Django recopilará los archivos estáticos
+STATICFILES_DIRS = [BASE_DIR / "home/templates/home/static"]  # Carpeta donde guardas archivos estáticos manualmente
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

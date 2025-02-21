@@ -1,5 +1,5 @@
 from typing import List, Optional
-from gestion_stock.models import Proveedor, Localidad
+from gestion_stock.models import Proveedor, Localidad, Producto
 
 class ProveedorRepository:
 
@@ -18,6 +18,9 @@ class ProveedorRepository:
 
     def filter_by_localidad(self, localidad: Localidad) -> List[Proveedor]:
         return Proveedor.objects.filter(localidad=localidad)
+
+    def get_stock_bajo(self, threshold=3):
+        return Producto.objects.filter(stock__lt=threshold)
 
     def create(
         self, 

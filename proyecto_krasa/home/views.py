@@ -13,7 +13,8 @@ from django.views import View
 from usuarios.forms import UserRegisterForm
 from django.contrib import messages 
  
-
+from django.db.models import Count
+from gestion_stock.models import Producto, Venta
 class LoginView(View):
     def get(self, request):
         return render(request, 'home/login.html')
@@ -69,9 +70,17 @@ class RegisterView(View):
             )
         )
 
+def home_view(request):
+    # productos_mas_vendidos = (
+    #     Venta.objects.values('producto__nombre')
+    #     .annotate(ventas_semana=Count('id'))
+    #     .order_by('-ventas_semana')[:5]
+    # )
 
-def index_view(request):
-    return render(
-        request,
-        'home/index.html'
-    )
+    productos_stock_bajo = Producto.objects.filter(stock__lt=3)
+    print(productos_stock_bajo)  # Verifica si hay productos con stock bajo
+
+    return render(request, 'home/index.html', {
+        # 'productos_mas_vendidos': productos_mas_vendidos,
+        'productos_stock_bajo': productos_stock_bajo,
+    })
