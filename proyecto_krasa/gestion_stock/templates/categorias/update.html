@@ -1,0 +1,36 @@
+{% extends 'home/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <h2 class="text-dark font-weight-bold mb-4">{% trans "Editar Categoría" %}</h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_nombre" class="form-label">{% trans "Nombre de la Categoría" %}</label>
+                    <input type="text" name="nombre" id="id_nombre" class="form-control" value="{{ form.nombre.value }}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">{% trans "Actualizar Categoría" %}</button>
+
+</div>
+
+
+
+{% endblock %}

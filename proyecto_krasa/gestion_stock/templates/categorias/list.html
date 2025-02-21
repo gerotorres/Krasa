@@ -1,0 +1,185 @@
+{% extends 'home/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4 text-primary fw-bold">📂 {% trans "Categorías" %}</h1>
+        </div>
+
+
+<div class="container mt-4">
+    <h2>Gestión de Categorías y Subcategorías</h2>
+
+    <!-- Formulario para agregar categoría -->
+    <div class="card mb-4">
+        <div class="card-header">Agregar Nueva Categoría</div>
+        <div class="card-body">
+            <form id="form-categoria">
+                <div class="input-group">
+                    <input type="text" id="nombre-categoria" class="form-control" placeholder="Nombre de la categoría" required>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulario para agregar subcategoría -->
+    <div class="card mb-4">
+        <div class="card-header">Agregar Nueva Subcategoría</div>
+        <div class="card-body">
+            <form id="form-subcategoria">
+                <div class="input-group">
+                    <input type="text" id="nombre-subcategoria" class="form-control" placeholder="Nombre de la subcategoría" required>
+                    <select id="categoria-subcategoria" class="form-select" required>
+                        <option value="">Seleccione una categoría</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered shadow-sm text-center align-middle">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th scope="col">{% trans "Nombre de la Categoría" %}</th>
+                        <th scope="col">{% trans "Subcategorías" %}</th>
+                        <th scope="col">{% trans "Acciones" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.nombre }}</td>
+                        <td>
+                            {% for subcategoria in categoria.subcategoria_set.all %}
+                                <span class="badge bg-secondary">{{ subcategoria.nombre }}</span>
+                            {% empty %}
+                                <span class="text-muted">{% trans "Sin subcategorías" %}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'categoria_editar' categoria.id %}" class="btn btn-warning btn-sm">✏️ {% trans "Editar" %}</a>
+
+                                <!-- Botón para eliminar con confirmación -->
+                                <form method="post" action="{% url 'categoria_eliminar' categoria.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{% trans "¿Estás seguro de que deseas eliminar esta categoría?" %}|escapejs')">🗑️ {% trans "Eliminar" %}</button>
+
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted">{% trans "No hay categorías registradas" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+<script>
+    document.getElementById('form-categoria').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let nombre = document.getElementById('nombre-categoria').value;
+        fetch("{% url 'agregar_categoria' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ nombre: nombre })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                let categoriaSelect = document.getElementById('categoria-subcategoria');
+                let nuevaOpcion = new Option(data.nombre, data.id, true, true);
+                categoriaSelect.appendChild(nuevaOpcion);
+            } else {
+                alert("Error al agregar categoría");
+            }
+        });
+    });
+
+    document.getElementById('form-subcategoria').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let nombre = document.getElementById('nombre-subcategoria').value;
+        let categoriaId = document.getElementById('categoria-subcategoria').value;
+        fetch("{% url 'agregar_subcategoria' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ nombre: nombre, categoria: categoriaId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                location.reload();
+            } else {
+                alert("Error al agregar subcategoría");
+            }
+        });
+    });
+
+    function eliminarCategoria(id) {
+        if (confirm("¿Seguro que deseas eliminar esta categoría?")) {
+            fetch(`/categoria/delete/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
+            }).then(() => location.reload());
+        }
+    }
+    function abrirModalEditar(id, nombre) {
+    document.getElementById('editar-categoria-id').value = id;
+    document.getElementById('editar-nombre-categoria').value = nombre;
+
+    let modal = new bootstrap.Modal(document.getElementById('modalEditarCategoria'));
+    modal.show();
+}
+
+// Evento para actualizar la categoría
+document.getElementById('form-editar-categoria').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    let id = document.getElementById('editar-categoria-id').value;
+    let nombre = document.getElementById('editar-nombre-categoria').value;
+
+    fetch(`/categoria/editar/${id}/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new URLSearchParams({ "nombre": nombre })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarCategoria'));
+            modal.hide(); // Cerrar el modal después de guardar
+            location.reload(); // Recargar la página para ver los cambios
+        } else {
+            alert("Error al editar categoría");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+
+</script>
+{% endblock %}

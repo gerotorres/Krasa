@@ -1,5 +1,5 @@
 from typing import List, Optional
-from gestion_stock.models import Producto, Categoria, Subcategoria, Marca, DetalleVenta
+from gestion_stock.models import Producto, Categoria, Subcategoria, Marca, DetalleVenta, Proveedor
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Sum, Q
@@ -58,6 +58,7 @@ class ProductoRepository:
         marca: Optional[Marca] = None,
         codigo_barras: Optional[str] = None,
         ubicacion_deposito: Optional[str] = None,
+        proveedor: Optional[Proveedor] = None,
     ) -> Producto:
         return Producto.objects.create(
             nombre=nombre,
@@ -69,6 +70,7 @@ class ProductoRepository:
             marca=marca,
             codigo_barras=codigo_barras,
             ubicacion_deposito=ubicacion_deposito,
+            proveedor = proveedor
         )
 
     def filter_by_marca(self, marca: Marca) -> List[Producto]:
@@ -88,7 +90,7 @@ class ProductoRepository:
         return producto.delete()
         
     @staticmethod
-    def update(id, nombre, descripcion, precio, categoria, subcategoria, codigo_barras, ubicacion_deposito, marca, stock):
+    def update(id, nombre, descripcion, precio, categoria, subcategoria, codigo_barras, ubicacion_deposito, marca, stock, proveedor):
         producto = Producto.objects.get(id=id)
         producto.nombre = nombre
         producto.descripcion = descripcion
@@ -98,6 +100,8 @@ class ProductoRepository:
         producto.codigo_barras = codigo_barras
         producto.ubicacion_deposito = ubicacion_deposito
         producto.marca = marca
-        producto.stock = stock  # Asegurar que el stock no se modifique
+        producto.stock = stock  
+        producto.proveedor = proveedor
         producto.save()
+        
         return producto

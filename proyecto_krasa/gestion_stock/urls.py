@@ -4,7 +4,7 @@ from gestion_stock.views.cliente_view import ClienteListaView, ClienteCreateView
 from gestion_stock.views.proveedor_view import ProveedorListaView, ProveedorCreateView, ProveedorUpdateView, ProveedorDeleteView, agregar_proveedor
 from gestion_stock.views.producto_view import ProductoListaView, ProductoCreateView, ProductoUpdateView, ProductoDeleteView 
 from gestion_stock.views.marca_view import MarcaListaView, MarcaCreateView, MarcaUpdateView, MarcaDeleteView, agregar_marca
-from gestion_stock.views.categoria_view import CategoriaListaView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView, agregar_categoria
+from gestion_stock.views.categoria_view import CategoriaListaView, CategoriaCreateView, CategoriaUpdateView, CategoriaDeleteView, agregar_categoria, agregar_subcategoria
 from gestion_stock.views.subcategoria_view import SubcategoriaListaView, SubcategoriaCreateView, SubcategoriaUpdateView, SubcategoriaDeleteView
 from gestion_stock.views.venta_views import VentaListaView, VentaCreateView, VentaUpdateView, VentaDeleteView
 from gestion_stock.views.localidad_view import listar_localidades
@@ -39,17 +39,19 @@ urlpatterns = [
     path("agregar_marca/", agregar_marca, name="agregar_marca"),
 
     # 📌 URLs para Categorías
-    path('categorias/', CategoriaListaView.as_view(), name='categoria_lista'),
+    path('categorias/', CategoriaListaView.as_view(), name='categoria_list'),
     path('categorias/crear/', CategoriaCreateView.as_view(), name='categoria_crear'),
     path('categorias/editar/<int:id>/', CategoriaUpdateView.as_view(), name='categoria_editar'),
     path('categorias/eliminar/<int:id>/', CategoriaDeleteView.as_view(), name='categoria_eliminar'),
     path("agregar_categoria/", agregar_categoria, name="agregar_categoria"),
+    
 
     # 📌 URLs para Subcategorías
     path('subcategorias/', SubcategoriaListaView.as_view(), name='subcategoria_lista'),
     path('subcategorias/crear/', SubcategoriaCreateView.as_view(), name='subcategoria_crear'),
     path('subcategorias/editar/<int:id>/', SubcategoriaUpdateView.as_view(), name='subcategoria_editar'),
     path('subcategorias/eliminar/<int:id>/', SubcategoriaDeleteView.as_view(), name='subcategoria_eliminar'),
+    path('subcategoria/agregar/', agregar_subcategoria, name='agregar_subcategoria'),
 
     # 📌 URLs para Ventas
     path('ventas/', VentaListaView.as_view(), name='venta_lista'),

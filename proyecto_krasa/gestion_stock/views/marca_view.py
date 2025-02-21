@@ -30,15 +30,16 @@ def agregar_marca(request):
             return JsonResponse({"error": str(e)}, status=500)
     
     return JsonResponse({"error": "Método no permitido"}, status=405)
+
 class MarcaListaView(View):
     def get(self, request):
         marcas = repo.get_all()
-        return render(request, 'productos/marca_list.html', {'marcas': marcas})
+        return render(request, 'marca/list.html', {'marcas': marcas})
 
 class MarcaCreateView(View):
     def get(self, request):
         form = MarcaForm()
-        return render(request, 'productos/marca_create.html', {'form': form})
+        return render(request, 'marca/marca_create.html', {'form': form})
 
     def post(self, request):
         form = MarcaForm(request.POST)
@@ -49,23 +50,22 @@ class MarcaCreateView(View):
 
 class MarcaUpdateView(View):
     def get(self, request, id):
-        marca = get_object_or_404(repo.get_all(), id=id)
+        marca = get_object_or_404(Marca, id=id)  # Usar Modelo directo
         form = MarcaForm(instance=marca)
-        return render(request, 'productos/marca_update.html', {'form': form})
+        return render(request, 'productos/marca_update.html', {'form': form, 'marca': marca})
 
     def post(self, request, id):
-        marca = get_object_or_404(repo.get_all(), id=id)
+        marca = get_object_or_404(Marca, id=id)  # Usar Modelo directo
         form = MarcaForm(request.POST, instance=marca)
         if form.is_valid():
-            repo.update(marca=marca, nombre=form.cleaned_data['nombre'])
+            form.save()  # Usar el método save() en lugar de repo.update
             return redirect('marca_lista')
-        return render(request, 'productos/marca_update.html', {'form': form})
+        return render(request, 'productos/marca_update.html', {'form': form, 'marca': marca})
 
 class MarcaDeleteView(View):
     def get(self, request, id):
-        marca = repo.get_by_id(id)
-        if marca:
-            repo.delete(marca)
+        marca = get_object_or_404(Marca, id=id)  # Usar Modelo directo
+        marca.delete()
         return redirect('marca_lista')
 
 class IndexView(View):

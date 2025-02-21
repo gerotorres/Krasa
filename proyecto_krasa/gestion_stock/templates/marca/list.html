@@ -1,0 +1,84 @@
+{% extends 'home/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="bg-white p-4 rounded-lg shadow-lg">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4 text-primary fw-bold">🏷️ {% trans "Marcas" %}</h1>
+        </div>
+
+        <div class="container mt-4">
+            <h2>Gestión de Marcas</h2>
+
+            <!-- Formulario para agregar marca -->
+            <div class="card mb-4">
+                <div class="card-header">Agregar Nueva Marca</div>
+                <div class="card-body">
+                    <form id="form-marca">
+                        <div class="input-group">
+                            <input type="text" id="nombre-marca" class="form-control" placeholder="Nombre de la marca" required>
+                            <button type="submit" class="btn btn-primary">Agregar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered shadow-sm text-center align-middle">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th scope="col">{% trans "Nombre de la Marca" %}</th>
+                            <th scope="col">{% trans "Acciones" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for marca in marcas %}
+                        <tr>
+                            <td>{{ marca.nombre }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'marca_editar' marca.id %}" class="btn btn-warning btn-sm">✏️ {% trans "Editar" %}</a>
+                                    
+                                    <form method="post" action="{% url 'marca_eliminar' marca.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{% trans "¿Estás seguro de que deseas eliminar esta marca?" %}|escapejs')">🗑️ {% trans "Eliminar" %}</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-muted">{% trans "No hay marcas registradas" %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('form-marca').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let nombre = document.getElementById('nombre-marca').value;
+        fetch("{% url 'agregar_marca' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ nombre: nombre })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.id) {
+                location.reload();
+            } else {
+                alert("Error al agregar marca");
+            }
+        });
+    });
+</script>
+{% endblock %}
