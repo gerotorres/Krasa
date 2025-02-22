@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-8(xg4$f4l90ez*k(=rl%prtwoia75md1t=!=4f3!+pse%sq0qm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['tiendakrasa.com', 'skyblue-starling-421878.hostingersite.com']
 
 
 # Application definition
@@ -76,10 +79,15 @@ WSGI_APPLICATION = 'proyecto_krasa.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'u910813384_gestion_stock',
+        'USER': 'u910813384_krasa',
+        'PASSWORD': '1234Krasa',
+        'HOST': 'mysql.hostinger.com',  # O la IP del servidor de MySQL
+        'PORT': '3306',  # Puerto por defecto de MySQL
     }
 }
+
 
 
 # Password validation
